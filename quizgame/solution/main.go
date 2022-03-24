@@ -3,15 +3,19 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
 )
 
-const filename = "problems.csv"
+const defaultFilename = "problems.csv"
 
 func main() {
-	csvFile, err := os.Open(filename)
+	filename := flag.String("file", defaultFilename, "fichero csv con las preguntas y las respuestas")
+	flag.Parse()
+
+	csvFile, err := os.Open(*filename)
 	if err != nil {
 		panic(err)
 	}

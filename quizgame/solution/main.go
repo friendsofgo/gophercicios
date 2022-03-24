@@ -2,21 +2,21 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"strings"
 )
 
-func main() {
-	quizzes := []byte(`5+5,10
-7+3,10
-1+1,2
-`)
+const filename = "problems.csv"
 
-	r := bytes.NewReader(quizzes)
-	csvReader := csv.NewReader(r)
+func main() {
+	csvFile, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	csvReader := csv.NewReader(csvFile)
 
 	data, err := csvReader.ReadAll()
 	if err != nil {

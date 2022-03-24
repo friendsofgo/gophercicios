@@ -60,14 +60,15 @@ loop:
 
 		ch := make(chan string)
 
+		answer := cleanString(row[1])
 		go func() {
 			in, _ := inReader.ReadString('\n')
-			ch <- in
+			ch <- cleanString(in)
 		}()
 
 		select {
 		case userInput := <-ch:
-			if row[1] == strings.Replace(userInput, "\n", "", -1) {
+			if answer == userInput {
 				asserts++
 			}
 		case <-ctx.Done():
@@ -76,6 +77,14 @@ loop:
 	}
 
 	fmt.Printf("Has acertado: %d de %d\n", asserts, len(data))
+}
+
+func cleanString(in string) string {
+	in = strings.TrimSpace(in)
+	in = strings.ToLower(in)
+	in = strings.Replace(in, "\n", "", -1)
+
+	return in
 }
 
 func toShuffle(data [][]string) ([][]string, error) {

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -19,6 +20,7 @@ const (
 func main() {
 	filename := flag.String("file", defaultFilename, "fichero csv con las preguntas y las respuestas")
 	timeout := flag.Duration("timeout", defaultTimeout, "tiempo máximo para responder a las preguntas")
+	shuffle := flag.Bool("shuffle", false, "orden aleatorio de las preguntas")
 	flag.Parse()
 
 	csvFile, err := os.Open(*filename)
@@ -32,6 +34,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if *shuffle {
+		data, err = toShuffle(data)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	inReader := bufio.NewReader(os.Stdin)
 
@@ -43,6 +51,7 @@ func main() {
 
 	var asserts int
 
+loop:
 	for _, row := range data {
 		if len(row) != 2 {
 			panic("liada")
@@ -62,9 +71,27 @@ func main() {
 				asserts++
 			}
 		case <-ctx.Done():
-			goto end
+			break loop
 		}
 	}
-end:
+
 	fmt.Printf("Has acertado: %d de %d\n", asserts, len(data))
+}
+
+func toShuffle(data [][]string) ([][]string, error) {
+	m := make(map[string]string)
+	for _, row := range data {
+		if len(row) != 2 {
+			return nil, errors.New("max length 2")
+		}
+
+		m[row[0]] = row[1]
+	}
+
+	out := make([][]string, 0, len(data))
+	for k, v := range m {
+		out = append(out, []string{k, v})
+	}
+
+	return out, nil
 }
